@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#8a5a2b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="말씀 리더">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>말씀 리더</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header id="top">
+  <div class="brand">말씀 리더</div>
+  <div class="nav">
+    <button id="prevCh" class="ib" title="이전 장 (←)">‹</button>
+    <select id="bookSel" title="책"></select>
+    <select id="chapSel" title="장"></select>
+    <button id="nextCh" class="ib" title="다음 장 (→)">›</button>
+    <input id="refInput" placeholder="이동: 요 3:16, 창1, John 3" autocomplete="off">
+  </div>
+  <div class="spacer"></div>
+  <div class="seg" id="layoutSeg" title="화면 분할">
+    <button data-n="1">1</button><button data-n="2">2</button><button data-n="3">3</button><button data-n="4">4</button>
+  </div>
+  <button id="syncBtn" class="tog on" title="분할 화면 스크롤 동기화">⇅<span class="lbl"> 동기</span></button>
+  <button id="strongBtn" class="tog" title="원어번호(Strong) 표시">원어<span class="lbl">번호</span></button>
+  <div class="seg">
+    <button id="fontDown" title="글자 작게">가−</button><button id="fontUp" title="글자 크게">가+</button>
+  </div>
+  <button id="viewBtn" class="tog" title="글꼴·색·테마">Aa<span class="lbl"> 보기</span></button>
+  <button id="readBtn" class="tog" title="읽기 모드 — 메뉴 없이 본문만 (전체화면)">⛶<span class="lbl"> 읽기</span></button>
+  <button id="drawerBtn" class="tog" title="노트·주석·검색 패널">☰<span class="lbl"> 패널</span></button>
+</header>
+
+<div id="wrap">
+  <main id="panes"></main>
+  <aside id="drawer" hidden>
+    <nav class="tabs">
+      <button data-tab="info">절 정보</button>
+      <button data-tab="notes">노트</button>
+      <button data-tab="search">검색</button>
+      <button data-tab="lex">원어사전</button>
+      <button data-tab="maps">지도</button>
+      <button class="close" id="drawerClose" title="닫기">✕</button>
+    </nav>
+    <section data-tab="info" class="tabbody"><p class="empty">본문에서 절 번호를 누르면 대조 번역·주석·관주·위키 문서·노트를 여기서 볼 수 있습니다.</p></section>
+    <section data-tab="notes" class="tabbody"></section>
+    <section data-tab="search" class="tabbody">
+      <form id="searchForm">
+        <input id="searchQ" placeholder="검색어 (띄어쓰기 = AND)">
+        <div class="row">
+          <select id="searchV"></select>
+          <select id="searchScope">
+            <option value="all">전체</option><option value="ot">구약</option><option value="nt">신약</option><option value="book">현재 책</option>
+          </select>
+          <button>검색</button>
+        </div>
+      </form>
+      <div id="searchOut"></div>
+    </section>
+    <section data-tab="maps" class="tabbody"></section>
+    <section data-tab="lex" class="tabbody"><p class="empty">원어번호(Strong) 성경 또는 원전분해에서 번호를 누르면 사전이 열립니다.</p></section>
+  </aside>
+</div>
+
+<div id="selbar" hidden>
+  <button data-c="yellow" class="sw yellow" title="노랑"></button>
+  <button data-c="green" class="sw green" title="초록"></button>
+  <button data-c="blue" class="sw blue" title="파랑"></button>
+  <button data-c="pink" class="sw pink" title="분홍"></button>
+  <button data-ul="1" class="ulbtn" title="밑줄"><u>밑줄</u></button>
+  <span class="sep"></span>
+  <button data-act="note">✎ 노트</button>
+  <button data-act="copy">복사</button>
+</div>
+
+<div id="pop" hidden></div>
+<div id="viewPanel" hidden></div>
+<div id="modal" hidden><div class="mbox"><header><span class="mtitle"></span><button class="close">✕</button></header><div class="mbody md"></div></div></div>
+<div id="toast" hidden></div>
+
+<!-- 듣기·읽기 모드 조작 막대 (조작이 없으면 서서히 사라짐) -->
+<div id="dock" hidden>
+  <div class="dk-status"><span class="dk-title" title="재생 중인 장으로 이동"></span><span class="dk-time"></span></div>
+  <div class="dk-prog" title="재생 위치"><div class="dk-track"><div class="dk-bar"></div></div></div>
+  <div class="dk-row"></div>
+</div>
+<div id="ttsPanel" hidden></div>
+<button id="dockHint" hidden title="조작 막대 보이기" aria-label="조작 막대 보이기"></button>
+
+<template id="paneTpl">
+  <section class="pane">
+    <header class="ph">
+      <select class="vsel"></select>
+      <span class="ptitle"></span>
+      <button class="pplay" title="이 번역을 소리로 듣기" hidden></button>
+      <button class="lock tog on" title="이 창을 스크롤 동기화에 포함">⇅</button>
+    </header>
+    <div class="pb" tabindex="0"><div class="pc"></div></div>
+  </section>
+</template>
+<script src="site.js"></script>
+<script src="app.js"></script>
+<script src="player.js"></script>
+</body>
+</html>

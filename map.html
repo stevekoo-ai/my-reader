@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>지도</title>
+<style>body { font-family: "Noto Sans KR", "Malgun Gothic", sans-serif; padding: 24px; color: #555; }</style>
+</head>
+<body>
+<p id="msg">지도를 여는 중…</p>
+<script>
+/* GitHub Pages 판 지도 보기: map.html#<암호화 파일 이름>
+   말씀 리더에서 연 키(이 탭의 sessionStorage 또는 '이 기기 기억하기')로 풀어서 이 화면에 그린다. */
+(async () => {
+  const msg = t => { document.getElementById('msg').textContent = t; };
+  const k = sessionStorage.getItem('mr.skey') || localStorage.getItem('mr.key');
+  const file = location.hash.slice(1);
+  if (!k) return msg('먼저 말씀 리더에서 비밀번호를 입력하세요.');
+  if (!/^[0-9a-f]{24}\.bin$/.test(file)) return msg('지도를 찾을 수 없습니다.');
+  try {
+    const key = await crypto.subtle.importKey('raw', Uint8Array.from(atob(k), c => c.charCodeAt(0)), 'AES-GCM', false, ['decrypt']);
+    const u8 = new Uint8Array(await fetch('data/' + file).then(r => r.arrayBuffer()));
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: u8.slice(0, 12) }, key, u8.slice(12));
+    const html = await new Response(new Blob([plain]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+    document.open();
+    document.write(html);
+    document.close();
+  } catch {
+    msg('지도를 열지 못했습니다. 말씀 리더에서 다시 열어 주세요.');
+  }
+})();
+</script>
+</body>
+</html>

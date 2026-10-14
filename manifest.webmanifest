@@ -1,0 +1,16 @@
+{
+  "name": "말씀 리더",
+  "short_name": "말씀 리더",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f2ee",
+  "theme_color": "#8a5a2b",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
